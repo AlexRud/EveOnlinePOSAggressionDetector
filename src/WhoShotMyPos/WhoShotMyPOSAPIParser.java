@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package whudushutpos;
+package WhoShotMyPos;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,14 +19,14 @@ import java.util.logging.Logger;
  *
  * @author Alex
  */
-public class WhuDuShutPosGUI extends javax.swing.JFrame {
+public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
 
     Timer timer = new Timer();
 
     /**
      * Creates new form WhuDuShutPosGUI
      */
-    public WhuDuShutPosGUI() {
+    public WhoShotMyPOSAPIParser() {
         initComponents();
         StopButton.setVisible(false);
     }
@@ -83,11 +83,11 @@ public class WhuDuShutPosGUI extends javax.swing.JFrame {
                             }
                         }
                     } catch (IOException ex) {
-                        Logger.getLogger(WhuDuShutPosGUI.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                 } catch (MalformedURLException ex) {
-                    Logger.getLogger(WhuDuShutPosGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
             }
@@ -194,20 +194,21 @@ public class WhuDuShutPosGUI extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(WhuDuShutPosGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(WhuDuShutPosGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(WhuDuShutPosGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(WhuDuShutPosGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new WhuDuShutPosGUI().setVisible(true);
+                new WhoShotMyPOSAPIParser().setVisible(true);
             }
         });
     }
