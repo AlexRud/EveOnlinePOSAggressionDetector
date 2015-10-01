@@ -29,9 +29,12 @@
                   <Component id="weblink" max="32767" attributes="0"/>
                   <Component id="jScrollPane1" pref="290" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace pref="17" max="32767" attributes="0"/>
-              <Component id="webbuttan" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="webbuttan" max="32767" attributes="0"/>
+                  <Component id="StopButton" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -44,7 +47,13 @@
                   <Component id="webbuttan" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="249" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jScrollPane1" pref="249" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="StopButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -78,5 +87,13 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="StopButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Stop"/>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="StopButtonMouseClicked"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>
