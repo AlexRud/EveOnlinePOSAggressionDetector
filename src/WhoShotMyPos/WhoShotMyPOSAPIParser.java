@@ -17,7 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
@@ -42,10 +42,13 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
      * Creates new form WhuDuShutPosGUI
      */
     public WhoShotMyPOSAPIParser() {
-        initComponents();
+        initComponents();        
         loadSystemName();
+        outputPlace.append("Systems Loaded\n");
         loadNotificationIDs();
-        api = new SlackApi("https://hooks.slack.com/services/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");        
+        outputPlace.append("Notifications Loaded\n");   
+        outputPlace.append("-----------------------\n");
+        loadDefaults();
     }
 
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
@@ -56,7 +59,8 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
     //Character name, corp name, alliance name, shield hp, time, system?
     //Luke API
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
-    //public void getNotifications() {
+    //https://hooks.slack.com/services/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
+    
     TimerTask task = new TimerTask() {
         @Override
         public void run() {
@@ -66,8 +70,10 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
             String alliance = null;
             String shieldHP = null;
             String system = null;
+            Instant instant = Instant.now();
+            outputPlace.append("Running.... " + instant +"\n");
             try {                
-                URL url = new URL(weblink.getText());
+                URL url = new URL(apiField.getText());
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
@@ -76,7 +82,7 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
                             if (!notificationID.contains(s)) {                                
                                 notificationID.add(s);
                                 timeDate = inputLine.substring(inputLine.indexOf("sentDate=") + 10, inputLine.indexOf("sentDate=") + 29);
-                                String edit = weblink.getText().replace("Notifications", "NotificationTexts");
+                                String edit = apiField.getText().replace("Notifications", "NotificationTexts");
                                 URL url1 = new URL(edit + "&IDs=" + s);
                                 try (BufferedReader in1 = new BufferedReader(new InputStreamReader(url1.openStream()))) {
                                     String inputLine2;
@@ -143,23 +149,27 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        weblink = new javax.swing.JTextField();
-        webbuttan = new javax.swing.JButton();
+        apiField = new javax.swing.JTextField();
+        goButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         outputPlace = new javax.swing.JTextArea();
         StopButton = new javax.swing.JButton();
+        slackTokenField = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        saveDefaults = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        weblink.setAutoscrolls(false);
-        weblink.setMaximumSize(new java.awt.Dimension(290, 21));
-        weblink.setMinimumSize(new java.awt.Dimension(290, 21));
+        apiField.setAutoscrolls(false);
+        apiField.setMaximumSize(new java.awt.Dimension(290, 21));
+        apiField.setMinimumSize(new java.awt.Dimension(290, 21));
 
-        webbuttan.setText("Do Work");
-        webbuttan.setFocusable(false);
-        webbuttan.addMouseListener(new java.awt.event.MouseAdapter() {
+        goButton.setText("Go!");
+        goButton.setFocusable(false);
+        goButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                webbuttanMouseClicked(evt);
+                goButtonMouseClicked(evt);
             }
         });
 
@@ -175,48 +185,104 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
             }
         });
 
+        slackTokenField.setMaximumSize(new java.awt.Dimension(250, 21));
+        slackTokenField.setMinimumSize(new java.awt.Dimension(250, 21));
+
+        jLabel1.setText("API:");
+
+        jLabel2.setText("Slack Token:");
+
+        saveDefaults.setText("Save Links as Defaults");
+        saveDefaults.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                saveDefaultsMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(apiField, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(slackTokenField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1)
-                    .addComponent(weblink, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(webbuttan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(StopButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(goButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(StopButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(saveDefaults)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(webbuttan)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(weblink, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(2, 2, 2)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(slackTokenField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(3, 3, 3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(apiField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGap(4, 4, 4)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(saveDefaults)
+                    .addComponent(StopButton)
+                    .addComponent(goButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(StopButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void webbuttanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_webbuttanMouseClicked
+    private void goButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_goButtonMouseClicked
+        saveDefaults();
+        api = new SlackApi(slackTokenField.getText());   
         timer = new Timer();
-        timer.scheduleAtFixedRate(task, 0, 1000 * 60 * 15);
-    }//GEN-LAST:event_webbuttanMouseClicked
+        timer.scheduleAtFixedRate(task, 0, 1000 * 60);
+    }//GEN-LAST:event_goButtonMouseClicked
 
     private void StopButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StopButtonMouseClicked
+        if(timer != null) {
+            timer.cancel();
+        }
         dispose();
     }//GEN-LAST:event_StopButtonMouseClicked
+
+    private void saveDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveDefaultsMouseClicked
+        saveDefaults();
+    }//GEN-LAST:event_saveDefaultsMouseClicked
+         
+    private void saveDefaults(){
+        if(!apiField.getText().equals("") && !slackTokenField.getText().equals("")){
+            notificationID.add(0, apiField.getText());
+            notificationID.add(1, slackTokenField.getText());
+            saveNotificationIDs();
+            outputPlace.append("Defaults Saved\n");
+        }
+        else{
+            outputPlace.append("Please fill in both boxes\n");
+        }
+    }
+    
+    private void loadDefaults(){
+        if(notificationID.size() > 0){apiField.setText(notificationID.get(0).toString());}
+        if(notificationID.size() > 0){slackTokenField.setText(notificationID.get(1).toString());}
+    }
     
     private void loadSystemName() {
         BufferedReader br;
@@ -229,7 +295,7 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
                 int id = Integer.parseInt(nameLevel[0]);
                 systemNames.put(id, name);
             }
-            br.close();
+            br.close();            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -242,7 +308,6 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
             ObjectOutputStream obj_out;
             obj_out = new ObjectOutputStream(f_out);
             obj_out.writeObject(notificationID);
-            System.out.println(notificationID);
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -264,10 +329,29 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
                 
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException | ClassNotFoundException ex) {
+                Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else
+        {
+            FileOutputStream f_out = null;
+            try {
+                File f = new File("notificationIDs.data");
+                f_out = new FileOutputStream(f);
+                ObjectOutputStream obj_out;
+                obj_out = new ObjectOutputStream(f_out);   
+                obj_out.writeObject(notificationID);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    f_out.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -310,9 +394,13 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton StopButton;
+    private javax.swing.JTextField apiField;
+    private javax.swing.JButton goButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea outputPlace;
-    private javax.swing.JButton webbuttan;
-    private javax.swing.JTextField weblink;
+    private javax.swing.JButton saveDefaults;
+    private javax.swing.JTextField slackTokenField;
     // End of variables declaration//GEN-END:variables
 }
