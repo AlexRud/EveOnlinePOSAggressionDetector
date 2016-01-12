@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -20,10 +21,12 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.DefaultCaret;
 import net.gpedro.integrations.slack.SlackApi;
 import net.gpedro.integrations.slack.SlackMessage;
 
@@ -32,7 +35,7 @@ import net.gpedro.integrations.slack.SlackMessage;
  * @author Alex
  */
 public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
-    
+
     Timer timer;
     SlackApi api;
     HashMap<Integer, String> systemNames = new HashMap();
@@ -42,13 +45,15 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
      * Creates new form WhuDuShutPosGUI
      */
     public WhoShotMyPOSAPIParser() {
-        initComponents();        
+        initComponents();
         loadSystemName();
         outputPlace.append("Systems Loaded\n");
         loadNotificationIDs();
-        outputPlace.append("Notifications Loaded\n");   
+        outputPlace.append("Notifications Loaded\n");
         outputPlace.append("-----------------------\n");
         loadDefaults();
+        DefaultCaret caret = (DefaultCaret)outputPlace.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     }
 
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
@@ -60,7 +65,6 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
     //Luke API
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
     //https://hooks.slack.com/services/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
-    
     TimerTask task = new TimerTask() {
         @Override
         public void run() {
@@ -71,22 +75,22 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
             String shieldHP = null;
             String system = null;
             Instant instant = Instant.now();
-            outputPlace.append("Running.... " + instant +"\n");
-            try {                
+            outputPlace.append("Running.... " + instant + "\n");
+            try {
                 URL url = new URL(apiField.getText());
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
-                        if (inputLine.contains("typeID=\"75\"")) {                            
+                        if (inputLine.contains("typeID=\"75\"")) {
                             String s = inputLine.substring(inputLine.indexOf("=") + 2, inputLine.indexOf("typeID") - 2);
-                            if (!notificationID.contains(s)) {                                
+                            if (!notificationID.contains(s)) {
                                 notificationID.add(s);
                                 timeDate = inputLine.substring(inputLine.indexOf("sentDate=") + 10, inputLine.indexOf("sentDate=") + 29);
                                 String edit = apiField.getText().replace("Notifications", "NotificationTexts");
                                 URL url1 = new URL(edit + "&IDs=" + s);
                                 try (BufferedReader in1 = new BufferedReader(new InputStreamReader(url1.openStream()))) {
                                     String inputLine2;
-                                    while ((inputLine2 = in1.readLine()) != null) {                                        
+                                    while ((inputLine2 = in1.readLine()) != null) {
                                         if (inputLine2.contains("aggressorID")) {
                                             String s1 = inputLine2.substring(inputLine2.lastIndexOf(":") + 2);
                                             URL url2 = new URL("https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid=" + s1);
@@ -94,15 +98,15 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
                                                 String inputLine3;
                                                 while ((inputLine3 = in2.readLine()) != null) {
                                                     if (inputLine3 != null && inputLine3.contains("characterName")) {
-                                                        character = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));                                                        
+                                                        character = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));
                                                     }
                                                     if (inputLine3 != null && inputLine3.contains("<corporation>")) {
-                                                        corp = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));                                                        
+                                                        corp = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));
                                                     }
                                                     if (inputLine3 != null && inputLine3.contains("<alliance>")) {
                                                         alliance = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));
-                                                    }                                                    
-                                                }                                                
+                                                    }
+                                                }
                                             }
                                         }
                                         if (inputLine2.contains("solarSystemID")) {
@@ -111,31 +115,31 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
                                             system = systemNames.get(id);
                                         }
                                         if (inputLine2.contains("shieldValue")) {
-                                            shieldHP = inputLine2.substring(inputLine2.lastIndexOf(":") + 4, inputLine2.lastIndexOf(":") + 6) +"%";  
-                                            
-                                        }                                        
+                                            shieldHP = inputLine2.substring(inputLine2.lastIndexOf(":") + 4, inputLine2.lastIndexOf(":") + 6) + "%";
+
+                                        }
                                     }
-                                    outputPlace.append("Time: " + timeDate + "\nAttacker: " + character + " \nAttacker Corporation: " + corp + "\nAttacker Alliance: " + alliance + "\nPOS Shield HP: " + shieldHP 
+                                    outputPlace.append("Time: " + timeDate + "\nAttacker: " + character + " \nAttacker Corporation: " + corp + "\nAttacker Alliance: " + alliance + "\nPOS Shield HP: " + shieldHP
                                             + "\nSystem: " + system + "\n---------------------");
-                                    String output = "Time: " + timeDate + "\nAttacker: " + character + " \nAttacker Corporation: " + corp + "\nAttacker Alliance: " + alliance + "\nPOS Shield HP: " + shieldHP 
-                                            + "\nSystem: " + system + "\n---------------------";
+                                    String output = "Time: " + timeDate + "\nAttacker: " + character + " \nAttacker Corporation: " + corp + "\nAttacker Alliance: " + alliance + "\nPOS Shield HP: " + shieldHP
+                                            + "\nSystem: " + system + "\n---------------------\n";
                                     saveNotificationIDs();
-                                    api.call(new SlackMessage("#posbotspam" , output));
+                                    api.call(new SlackMessage("#posbotspam", output));
                                 }
                             } else {
                                 notificationID.add(s);
                             }
                         }
-                        
-                    }                    
+
+                    }
                 } catch (IOException ex) {
                     Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
+
             } catch (MalformedURLException ex) {
                 Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         }
     };
     //}
@@ -251,13 +255,13 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
 
     private void goButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_goButtonMouseClicked
         saveDefaults();
-        api = new SlackApi(slackTokenField.getText());   
+        api = new SlackApi(slackTokenField.getText());
         timer = new Timer();
         timer.scheduleAtFixedRate(task, 0, 1000 * 60);
     }//GEN-LAST:event_goButtonMouseClicked
 
     private void StopButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StopButtonMouseClicked
-        if(timer != null) {
+        if (timer != null) {
             timer.cancel();
         }
         dispose();
@@ -266,44 +270,59 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
     private void saveDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveDefaultsMouseClicked
         saveDefaults();
     }//GEN-LAST:event_saveDefaultsMouseClicked
-         
-    private void saveDefaults(){
-        if(!apiField.getText().equals("") && !slackTokenField.getText().equals("")){
+
+    private void saveDefaults() {
+        if (!apiField.getText().equals("") && !slackTokenField.getText().equals("")) {
             notificationID.add(0, apiField.getText());
             notificationID.add(1, slackTokenField.getText());
             saveNotificationIDs();
             outputPlace.append("Defaults Saved\n");
-        }
-        else{
+        } else {
             outputPlace.append("Please fill in both boxes\n");
         }
     }
-    
-    private void loadDefaults(){
-        if(notificationID.size() > 0){apiField.setText(notificationID.get(0).toString());}
-        if(notificationID.size() > 0){slackTokenField.setText(notificationID.get(1).toString());}
-    }
-    
-    private void loadSystemName() {
-        BufferedReader br;
-        try {
-            String currentLine;
-            br = new BufferedReader(new FileReader("SolarSystemIDs.txt"));
-            while ((currentLine = br.readLine()) != null) {
-                String[] nameLevel = currentLine.split("\t");
-                String name = nameLevel[1].trim();
-                int id = Integer.parseInt(nameLevel[0]);
-                systemNames.put(id, name);
-            }
-            br.close();            
-        } catch (IOException e) {
-            e.printStackTrace();
+
+    private void loadDefaults() {
+        if (notificationID.size() > 0) {
+            apiField.setText(notificationID.get(0).toString());
+        }
+        if (notificationID.size() > 0) {
+            slackTokenField.setText(notificationID.get(1).toString());
         }
     }
+
+    private void loadSystemName() {
+        InputStream is = this.getClass().getResourceAsStream("/data/SolarSystemIDs.txt");
+        Scanner in = new Scanner(is);
+
+        while ((in.hasNextLine())) {
+            String[] nameLevel = in.nextLine().split("\t");
+            String name = nameLevel[1].trim();
+            int id = Integer.parseInt(nameLevel[0]);
+            systemNames.put(id, name);
+        }
+    }
+
+//        private void loadSystemName() {
+//        BufferedReader br;
+//        try {
+//            String currentLine;
+//            br = new BufferedReader(new FileReader("SolarSystemIDs.txt"));
+//            while ((currentLine = br.readLine()) != null) {
+//                String[] nameLevel = currentLine.split("\t");
+//                String name = nameLevel[1].trim();
+//                int id = Integer.parseInt(nameLevel[0]);
+//                systemNames.put(id, name);
+//            }
+//            br.close();            
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
     
     private void saveNotificationIDs() {
         try {
-            File f = new File("notificationIDs.data");
+            File f = new File("/root/Desktop/dist/notificationIDs.data");
             FileOutputStream f_out = new FileOutputStream(f);
             ObjectOutputStream obj_out;
             obj_out = new ObjectOutputStream(f_out);
@@ -312,35 +331,33 @@ public class WhoShotMyPOSAPIParser extends javax.swing.JFrame {
             System.out.println(ex);
         }
     }
-    
+
     private void loadNotificationIDs() {
         FileInputStream f_in1 = null;
-        File f1 = new File("notificationIDs.data");
-        
+        File f1 = new File("/root/Desktop/dist/notificationIDs.data");
+
         if (f1.exists()) {
             try {
                 f_in1 = new FileInputStream(f1);
                 ObjectInputStream obj_in1 = new ObjectInputStream(f_in1);
-                notificationID = (ArrayList) obj_in1.readObject();                
+                notificationID = (ArrayList) obj_in1.readObject();
                 System.out.println(notificationID);
-                
+
                 obj_in1.close();
                 f_in1.close();
-                
+
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        else
-        {
+        } else {
             FileOutputStream f_out = null;
             try {
-                File f = new File("notificationIDs.data");
+                File f = new File("/root/Desktop/dist/notificationIDs.data");
                 f_out = new FileOutputStream(f);
                 ObjectOutputStream obj_out;
-                obj_out = new ObjectOutputStream(f_out);   
+                obj_out = new ObjectOutputStream(f_out);
                 obj_out.writeObject(notificationID);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(WhoShotMyPOSAPIParser.class.getName()).log(Level.SEVERE, null, ex);
