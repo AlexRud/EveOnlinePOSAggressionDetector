@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,8 +23,9 @@ import net.gpedro.integrations.slack.SlackMessage;
  */
 public class WhoShotMyPOSMainClass {
     
-    private final Notifications notificationID = new Notifications();
+    private final Notifications notificationIDCollection = new Notifications();
     private final solarSystemData systemNames = new solarSystemData();
+    private ArrayList<String> WebpageInformationStorage = new ArrayList();
     
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
     //keyID, vCode, characterID.
@@ -34,81 +36,66 @@ public class WhoShotMyPOSMainClass {
     //Luke API
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
     //https://hooks.slack.com/services/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
-    TimerTask task = new TimerTask() {
-        @Override
-        public void run() {
-            String timeDate = null;
-            String character = null;
-            String corp = null;
-            String alliance = null;
-            String shieldHP = null;
-            String system = null;
-            Instant instant = Instant.now();
-            outputPlace.append("Running.... " + instant + "\n");
-            try {
-                URL url = new URL(apiField.getText());
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null) {
-                        if (inputLine.contains("typeID=\"75\"")) {
-                            String s = inputLine.substring(inputLine.indexOf("=") + 2, inputLine.indexOf("typeID") - 2);
-                            if (!notificationID.containsNotificationID(s)) {
-                                notificationID.addNotificationID(s);
-                                timeDate = inputLine.substring(inputLine.indexOf("sentDate=") + 10, inputLine.indexOf("sentDate=") + 29);
-                                String edit = apiField.getText().replace("Notifications", "NotificationTexts");
-                                URL url1 = new URL(edit + "&IDs=" + s);
-                                try (BufferedReader in1 = new BufferedReader(new InputStreamReader(url1.openStream()))) {
-                                    String inputLine2;
-                                    while ((inputLine2 = in1.readLine()) != null) {
-                                        if (inputLine2.contains("aggressorID")) {
-                                            String s1 = inputLine2.substring(inputLine2.lastIndexOf(":") + 2);
-                                            URL url2 = new URL("https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid=" + s1);
-                                            try (BufferedReader in2 = new BufferedReader(new InputStreamReader(url2.openStream()))) {
-                                                String inputLine3;
-                                                while ((inputLine3 = in2.readLine()) != null) {
-                                                    if (inputLine3 != null && inputLine3.contains("characterName")) {
-                                                        character = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));
-                                                    }
-                                                    if (inputLine3 != null && inputLine3.contains("<corporation>")) {
-                                                        corp = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));
-                                                    }
-                                                    if (inputLine3 != null && inputLine3.contains("<alliance>")) {
-                                                        alliance = inputLine3.substring(inputLine3.indexOf(">") + 1, inputLine3.indexOf("</"));
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (inputLine2.contains("solarSystemID")) {
-                                            String solarSystem = inputLine2.substring(inputLine2.lastIndexOf(":") + 2);
-                                            int id = Integer.parseInt(solarSystem);
-                                            system = systemNames.getSystemName(id);
-                                        }
-                                        if (inputLine2.contains("shieldValue")) {
-                                            shieldHP = inputLine2.substring(inputLine2.lastIndexOf(":") + 4, inputLine2.lastIndexOf(":") + 6) + "%";
-
-                                        }
-                                    }
-                                    outputPlace.append("Time: " + timeDate + "\nAttacker: " + character + " \nAttacker Corporation: " + corp + "\nAttacker Alliance: " + alliance + "\nPOS Shield HP: " + shieldHP
-                                            + "\nSystem: " + system + "\n---------------------");
-                                    String output = "Time: " + timeDate + "\nAttacker: " + character + " \nAttacker Corporation: " + corp + "\nAttacker Alliance: " + alliance + "\nPOS Shield HP: " + shieldHP
-                                            + "\nSystem: " + system + "\n---------------------\n";
-                                    notificationID.saveNotificationIDs();
-                                    api.call(new SlackMessage("#posbotspam", output));
-                                }
-                            } else {
-                                notificationID.addNotificationID(s);
-                            }
-                        }
-
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(WhoShotMyPOSGUI.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            } catch (MalformedURLException ex) {
-                Logger.getLogger(WhoShotMyPOSGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
+    
+    private URL createURL (String url){
+        URL createdUrl = null;
+        try {
+             createdUrl= new URL(url);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(WhoShotMyPOSMainClass.class.getName()).log(Level.SEVERE, null, ex);
         }
-    };
+        return createdUrl;
+    }
+    
+    private BufferedReader createBufferedReader(URL urlToRetreive){
+        BufferedReader buffReadIncoming = null;
+        try {
+            buffReadIncoming = new BufferedReader(new InputStreamReader(urlToRetreive.openStream()));
+        } catch (IOException ex) {
+            Logger.getLogger(WhoShotMyPOSMainClass.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return buffReadIncoming;
+    }
+    
+    private void readInputStreamToArray(BufferedReader BufferToRead){
+        try {
+            String incomingLine;
+            while((incomingLine = BufferToRead.readLine()) != null){
+                WebpageInformationStorage.add(incomingLine);
+            }   } catch (IOException ex) {
+            Logger.getLogger(WhoShotMyPOSMainClass.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private boolean checkIfNotificationIDExists(String notificationIDToCheck){
+        return notificationIDCollection.containsNotificationID(notificationIDToCheck);
+    }
+    
+    private void collectNotificationIDs(){
+        for(String webpageTemp: WebpageInformationStorage){
+            if(webpageTemp.contains("typeID=\"75\"")){
+                String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
+                if(!checkIfNotificationIDExists(notificationID)){notificationIDCollection.addNotificationID(notificationID);}
+            }
+        }
+    } 
+    
+    private String extractAggressorID(String aggressorIDContainedLine){
+        return aggressorIDContainedLine.substring(aggressorIDContainedLine.lastIndexOf(":") + 2);        
+    }
+    
+    private String createAggressorIDURLContents(String aggressorID){
+        return "https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid="+aggressorID;
+    }
+    
+    private String getSolarSystemName(String solarSystemIDContainingString){
+        String solarSystem = solarSystemIDContainingString.substring(solarSystemIDContainingString.lastIndexOf(":") + 2);
+        int id = Integer.parseInt(solarSystem);
+        return systemNames.getSystemName(id);
+    }
+    
+    private String getShieldValue(String shieldValueContainingString){
+        return shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
+    }
+    
 }
