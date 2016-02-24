@@ -98,4 +98,16 @@ public class WhoShotMyPOSMainClass {
         return shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
     }
     
+    private String getCharacterName(String characterNameContainedLine){
+        return characterNameContainedLine.substring(characterNameContainedLine.indexOf(">") + 1, characterNameContainedLine.indexOf("</"));
+    }
+    
+    private String getCharacterCorporation(String characterCorporationContainedLine){
+        return characterCorporationContainedLine.substring(characterCorporationContainedLine.indexOf(">") + 1, characterCorporationContainedLine.indexOf("</"));
+    }
+    
+    private String getCharacterAlliance(String characterAllianceContainedLine){
+        return characterAllianceContainedLine.substring(characterAllianceContainedLine.indexOf(">") + 1, characterAllianceContainedLine.indexOf("</"));
+    } 
+    
 }
