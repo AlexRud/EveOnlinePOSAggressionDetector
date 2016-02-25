@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,34 +23,38 @@ import java.util.logging.Logger;
  */
 public class Notifications {
 
-    private ArrayList notificationIdArray = new ArrayList();
+    private HashMap<String, Boolean> notificationIdHashMap = new HashMap();
     
     public Notifications(){
         loadNotificationIDs();
     }
     
     public void addNotificationID(String notificationID){
-        notificationIdArray.add(notificationID);
+        notificationIdHashMap.put(notificationID, false);
     }
     
     public void removeNotificationID(String notificationID){
-        notificationIdArray.remove(notificationID);
+        notificationIdHashMap.remove(notificationID);
     }
     
     public int getNotificationArraySize(){
-        return notificationIdArray.size();
+        return notificationIdHashMap.size();
     }
     
     public boolean containsNotificationID(String IDToCheck){
-        return notificationIdArray.contains(IDToCheck);
+        return notificationIdHashMap.containsKey(IDToCheck);
+    }
+    
+    public boolean getNotificationIDStatus(String notificationID){
+        return notificationIdHashMap.get(notificationID);
     }
 
 //    private void loadDefaults() {
-//        if (notificationIdArray.size() > 0) {
-//            apiField.setText(notificationIdArray.get(0).toString());
+//        if (notificationIdHashMap.size() > 0) {
+//            apiField.setText(notificationIdHashMap.get(0).toString());
 //        }
 //        if (notificationID.size() > 0) {
-//            slackTokenField.setText(notificationIdArray.get(1).toString());
+//            slackTokenField.setText(notificationIdHashMap.get(1).toString());
 //        }
 //    }
 
@@ -59,7 +64,7 @@ public class Notifications {
             FileOutputStream f_out = new FileOutputStream(f);
             ObjectOutputStream obj_out;
             obj_out = new ObjectOutputStream(f_out);
-            obj_out.writeObject(notificationIdArray);
+            obj_out.writeObject(notificationIdHashMap);
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -73,8 +78,8 @@ public class Notifications {
             try {
                 f_in1 = new FileInputStream(f1);
                 ObjectInputStream obj_in1 = new ObjectInputStream(f_in1);
-                notificationIdArray = (ArrayList) obj_in1.readObject();
-                System.out.println(notificationIdArray);
+                notificationIdHashMap = (HashMap) obj_in1.readObject();
+                System.out.println(notificationIdHashMap);
 
                 obj_in1.close();
                 f_in1.close();
@@ -91,7 +96,7 @@ public class Notifications {
                 f_out = new FileOutputStream(f);
                 ObjectOutputStream obj_out;
                 obj_out = new ObjectOutputStream(f_out);
-                obj_out.writeObject(notificationIdArray);
+                obj_out.writeObject(notificationIdHashMap);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(WhoShotMyPOSGUI.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {

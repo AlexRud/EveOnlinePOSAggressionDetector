@@ -22,11 +22,12 @@ import net.gpedro.integrations.slack.SlackMessage;
  * @author Alex
  */
 public class WhoShotMyPOSMainClass {
-    
+
     private final Notifications notificationIDCollection = new Notifications();
     private final solarSystemData systemNames = new solarSystemData();
     private ArrayList<String> WebpageInformationStorage = new ArrayList();
-    
+    private String message;
+
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
     //keyID, vCode, characterID.
     //https://api.eveonline.com/char/NotificationTexts.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198&IDs=530705490 notifications text request.
@@ -37,17 +38,28 @@ public class WhoShotMyPOSMainClass {
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
     //https://hooks.slack.com/services/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
     
-    private URL createURL (String url){
+    public void initialLoop(String URLToSearch) {
+        readURL(URLToSearch);
+        collectNotificationIDs();
+    }
+
+    private void readURL(String URLToUse) {
+        URL searchForNotifications = createURL(URLToUse);
+        BufferedReader searchBuffer = createBufferedReader(searchForNotifications);
+        readInputStreamToArray(searchBuffer);
+    }
+
+    private URL createURL(String url) {
         URL createdUrl = null;
         try {
-             createdUrl= new URL(url);
+            createdUrl = new URL(url);
         } catch (MalformedURLException ex) {
             Logger.getLogger(WhoShotMyPOSMainClass.class.getName()).log(Level.SEVERE, null, ex);
         }
         return createdUrl;
     }
-    
-    private BufferedReader createBufferedReader(URL urlToRetreive){
+
+    private BufferedReader createBufferedReader(URL urlToRetreive) {
         BufferedReader buffReadIncoming = null;
         try {
             buffReadIncoming = new BufferedReader(new InputStreamReader(urlToRetreive.openStream()));
@@ -56,58 +68,73 @@ public class WhoShotMyPOSMainClass {
         }
         return buffReadIncoming;
     }
-    
-    private void readInputStreamToArray(BufferedReader BufferToRead){
+
+    private void readInputStreamToArray(BufferedReader BufferToRead) {
         try {
             String incomingLine;
-            while((incomingLine = BufferToRead.readLine()) != null){
+            while ((incomingLine = BufferToRead.readLine()) != null) {
                 WebpageInformationStorage.add(incomingLine);
-            }   } catch (IOException ex) {
+            }
+        } catch (IOException ex) {
             Logger.getLogger(WhoShotMyPOSMainClass.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    private boolean checkIfNotificationIDExists(String notificationIDToCheck){
-        return notificationIDCollection.containsNotificationID(notificationIDToCheck);
-    }
-    
-    private void collectNotificationIDs(){
-        for(String webpageTemp: WebpageInformationStorage){
-            if(webpageTemp.contains("typeID=\"75\"")){
-                String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
-                if(!checkIfNotificationIDExists(notificationID)){notificationIDCollection.addNotificationID(notificationID);}
+
+    private void collectNotificationIDs() {
+        while (!WebpageInformationStorage.isEmpty()) {
+            for (String webpageTemp : WebpageInformationStorage) {
+                if (webpageTemp.contains("typeID=\"75\"")) {
+                    String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
+                    if (!notificationIDCollection.containsNotificationID(notificationID)) {
+                        notificationIDCollection.addNotificationID(notificationID);
+                        getTimeDate(webpageTemp);
+                    }
+                }
             }
         }
-    } 
-    
-    private String extractAggressorID(String aggressorIDContainedLine){
-        return aggressorIDContainedLine.substring(aggressorIDContainedLine.lastIndexOf(":") + 2);        
     }
     
-    private String createAggressorIDURLContents(String aggressorID){
-        return "https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid="+aggressorID;
+    private void getTimeDate(String timeDateContainingLine){
+        String timeDate = timeDateContainingLine.substring(timeDateContainingLine.indexOf("sentDate=") + 10, timeDateContainingLine.indexOf("sentDate=") + 29);   
+        buildMessageString(timeDate);
     }
-    
-    private String getSolarSystemName(String solarSystemIDContainingString){
+
+    private String extractAggressorID(String aggressorIDContainedLine) {
+        return aggressorIDContainedLine.substring(aggressorIDContainedLine.lastIndexOf(":") + 2);
+    }
+
+    private String createAggressorIDURLContents(String aggressorID) {
+        return "https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid=" + aggressorID;
+    }
+
+    private String getSolarSystemName(String solarSystemIDContainingString) {
         String solarSystem = solarSystemIDContainingString.substring(solarSystemIDContainingString.lastIndexOf(":") + 2);
         int id = Integer.parseInt(solarSystem);
         return systemNames.getSystemName(id);
     }
-    
-    private String getShieldValue(String shieldValueContainingString){
+
+    private String getShieldValue(String shieldValueContainingString) {
         return shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
     }
-    
-    private String getCharacterName(String characterNameContainedLine){
+
+    private String getCharacterName(String characterNameContainedLine) {
         return characterNameContainedLine.substring(characterNameContainedLine.indexOf(">") + 1, characterNameContainedLine.indexOf("</"));
     }
-    
-    private String getCharacterCorporation(String characterCorporationContainedLine){
+
+    private String getCharacterCorporation(String characterCorporationContainedLine) {
         return characterCorporationContainedLine.substring(characterCorporationContainedLine.indexOf(">") + 1, characterCorporationContainedLine.indexOf("</"));
     }
-    
-    private String getCharacterAlliance(String characterAllianceContainedLine){
+
+    private String getCharacterAlliance(String characterAllianceContainedLine) {
         return characterAllianceContainedLine.substring(characterAllianceContainedLine.indexOf(">") + 1, characterAllianceContainedLine.indexOf("</"));
-    } 
-    
+    }
+
+    private void buildMessageString(String lineToAdd) {
+        message += lineToAdd +"\n";
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
 }
