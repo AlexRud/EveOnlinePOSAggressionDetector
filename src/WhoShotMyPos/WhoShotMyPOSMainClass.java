@@ -12,6 +12,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +26,7 @@ import net.gpedro.integrations.slack.SlackMessage;
  */
 public class WhoShotMyPOSMainClass {
 
-    private final Notifications notificationIDCollection = new Notifications();
+    private final NotificationInformation notificationInformation = new NotificationInformation();
     private final solarSystemData systemNames = new solarSystemData();
     private ArrayList<String> WebpageInformationStorage = new ArrayList();
     private String message;
@@ -39,9 +42,23 @@ public class WhoShotMyPOSMainClass {
     //https://hooks.slack.com/services/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
     
     public void initialLoop(String URLToSearch) {
-        readURL(URLToSearch);
-        collectNotificationIDs();
+        collectNotificationIDs(URLToSearch);        
     }
+    
+    private void getNotificationTexts(String URLToSearch){
+        List<String> notificationIDs = notificationInformation.getNotificationIDsAsArrayList();
+        for(String notificationID: notificationIDs){
+            readURL(NotificationIDToTextURLChange(URLToSearch, notificationID));            
+            getNotificationTextInformation(notificationID);
+        }
+    }
+    
+    private String NotificationIDToTextURLChange(String URLToChange, String notificationID){
+        String changedURL = URLToChange.replace("Notification", "NotificationTexts");        
+        changedURL += notificationID;
+        return changedURL;
+    }
+            
 
     private void readURL(String URLToUse) {
         URL searchForNotifications = createURL(URLToUse);
@@ -80,23 +97,42 @@ public class WhoShotMyPOSMainClass {
         }
     }
 
-    private void collectNotificationIDs() {
-        while (!WebpageInformationStorage.isEmpty()) {
-            for (String webpageTemp : WebpageInformationStorage) {
-                if (webpageTemp.contains("typeID=\"75\"")) {
-                    String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
-                    if (!notificationIDCollection.containsNotificationID(notificationID)) {
-                        notificationIDCollection.addNotificationID(notificationID);
-                        getTimeDate(webpageTemp);
-                    }
+    private void collectNotificationIDs(String URLToSearch) {
+        readURL(URLToSearch);
+        HashMap hash = new HashMap();
+        for (String webpageTemp : WebpageInformationStorage) {
+            if (webpageTemp.contains("typeID=\"75\"")) {
+                String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
+                if (!notificationInformation.containsNotificationID(notificationID)) {
+                    hash.put("Time: ", getTimeDate(webpageTemp));
+                    notificationInformation.addNotificationID(notificationID, hash);
                 }
+            }
+        }
+        getNotificationTexts(URLToSearch);
+    }
+    
+    private void getNotificationTextInformation(String notificationID){        
+        for(String webpageTemp : WebpageInformationStorage){
+            if(webpageTemp.contains("aggressorID")){
+                getCharacterInformation((extractAggressorID(webpageTemp)), notificationID);
+            }
+            if(webpageTemp.contains("solarSystemID")){
+                getSolarSystemName(webpageTemp, notificationID);
+            }
+            if(webpageTemp.contains("shieldValue")){
+                getShieldValue(webpageTemp, notificationID);
             }
         }
     }
     
-    private void getTimeDate(String timeDateContainingLine){
-        String timeDate = timeDateContainingLine.substring(timeDateContainingLine.indexOf("sentDate=") + 10, timeDateContainingLine.indexOf("sentDate=") + 29);   
-        buildMessageString(timeDate);
+    private void getCharacterInformation(String aggressorID, String notificationID){
+        
+    }
+
+    private String getTimeDate(String timeDateContainingLine) {
+        String timeDate = timeDateContainingLine.substring(timeDateContainingLine.indexOf("sentDate=") + 10, timeDateContainingLine.indexOf("sentDate=") + 29);
+        return timeDate;
     }
 
     private String extractAggressorID(String aggressorIDContainedLine) {
@@ -107,30 +143,32 @@ public class WhoShotMyPOSMainClass {
         return "https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid=" + aggressorID;
     }
 
-    private String getSolarSystemName(String solarSystemIDContainingString) {
+    private void getSolarSystemName(String solarSystemIDContainingString, String notificationID) {
         String solarSystem = solarSystemIDContainingString.substring(solarSystemIDContainingString.lastIndexOf(":") + 2);
         int id = Integer.parseInt(solarSystem);
-        return systemNames.getSystemName(id);
+        String solarSystemName = systemNames.getSystemName(id);
+        notificationInformation.editNotificationInformation(notificationID, "Solar System: ", solarSystemName);
     }
 
-    private String getShieldValue(String shieldValueContainingString) {
-        return shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
+    private void getShieldValue(String shieldValueContainingString, String notificationID) {
+        String shieldValue = shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
+        notificationInformation.editNotificationInformation(notificationID, "Shield Value: ", shieldValue);
     }
 
-    private String getCharacterName(String characterNameContainedLine) {
+    private String getCharacterName(String characterNameContainedLine, String notificationID) {
         return characterNameContainedLine.substring(characterNameContainedLine.indexOf(">") + 1, characterNameContainedLine.indexOf("</"));
     }
 
-    private String getCharacterCorporation(String characterCorporationContainedLine) {
+    private String getCharacterCorporation(String characterCorporationContainedLine, String notificationID) {
         return characterCorporationContainedLine.substring(characterCorporationContainedLine.indexOf(">") + 1, characterCorporationContainedLine.indexOf("</"));
     }
 
-    private String getCharacterAlliance(String characterAllianceContainedLine) {
+    private String getCharacterAlliance(String characterAllianceContainedLine, String notificationID) {
         return characterAllianceContainedLine.substring(characterAllianceContainedLine.indexOf(">") + 1, characterAllianceContainedLine.indexOf("</"));
     }
 
     private void buildMessageString(String lineToAdd) {
-        message += lineToAdd +"\n";
+        message += lineToAdd + "\n";
     }
 
     public String getMessage() {

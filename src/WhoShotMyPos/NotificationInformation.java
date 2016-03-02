@@ -14,6 +14,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,50 +23,65 @@ import java.util.logging.Logger;
  *
  * @author Alex
  */
-public class Notifications {
+public class NotificationInformation {
 
-    private HashMap<String, Boolean> notificationIdHashMap = new HashMap();
-    
-    public Notifications(){
+    private HashMap<String, HashMap<String, String>> notificationInformationHashMap = new HashMap();
+
+    public NotificationInformation() {
         loadNotificationIDs();
     }
-    
-    public void addNotificationID(String notificationID){
-        notificationIdHashMap.put(notificationID, false);
+
+    public void addNotificationID(String notificationID, HashMap notificationInformation) {
+        notificationInformationHashMap.put(notificationID, notificationInformation);
+    }
+
+    public void removeNotificationID(String notificationID) {
+        notificationInformationHashMap.remove(notificationID);
+    }
+
+    public int getNotificationArraySize() {
+        return notificationInformationHashMap.size();
+    }
+
+    public boolean containsNotificationID(String IDToCheck) {
+        return notificationInformationHashMap.containsKey(IDToCheck);
     }
     
-    public void removeNotificationID(String notificationID){
-        notificationIdHashMap.remove(notificationID);
+    public void editNotificationInformation(String notificationId, String notificationInformationKey, String notificationInformationValue){
+        HashMap notificationInformation = getNotificationIDInformation(notificationId);
+        notificationInformation.put(notificationInformationKey, notificationInformationValue);
+        notificationInformationHashMap.put(notificationId, notificationInformation);
     }
-    
-    public int getNotificationArraySize(){
-        return notificationIdHashMap.size();
+
+    public HashMap getNotificationIDInformation(String notificationID) {
+        return notificationInformationHashMap.get(notificationID);
     }
-    
-    public boolean containsNotificationID(String IDToCheck){
-        return notificationIdHashMap.containsKey(IDToCheck);
-    }
-    
-    public boolean getNotificationIDStatus(String notificationID){
-        return notificationIdHashMap.get(notificationID);
+
+    public List<String> getNotificationIDsAsArrayList() {
+        List<String> notificationIdArray = new ArrayList();
+        if (!notificationInformationHashMap.isEmpty()) {
+            for (String notificationID : notificationInformationHashMap.keySet()) {
+                notificationIdArray.add(notificationID);
+            }
+        }
+        return notificationIdArray;
     }
 
 //    private void loadDefaults() {
-//        if (notificationIdHashMap.size() > 0) {
-//            apiField.setText(notificationIdHashMap.get(0).toString());
+//        if (notificationInformationHashMap.size() > 0) {
+//            apiField.setText(notificationInformationHashMap.get(0).toString());
 //        }
 //        if (notificationID.size() > 0) {
-//            slackTokenField.setText(notificationIdHashMap.get(1).toString());
+//            slackTokenField.setText(notificationInformationHashMap.get(1).toString());
 //        }
 //    }
-
     public void saveNotificationIDs() {
         try {
             File f = new File("notificationIDs.data");
             FileOutputStream f_out = new FileOutputStream(f);
             ObjectOutputStream obj_out;
             obj_out = new ObjectOutputStream(f_out);
-            obj_out.writeObject(notificationIdHashMap);
+            obj_out.writeObject(notificationInformationHashMap);
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -78,8 +95,8 @@ public class Notifications {
             try {
                 f_in1 = new FileInputStream(f1);
                 ObjectInputStream obj_in1 = new ObjectInputStream(f_in1);
-                notificationIdHashMap = (HashMap) obj_in1.readObject();
-                System.out.println(notificationIdHashMap);
+                notificationInformationHashMap = (HashMap) obj_in1.readObject();
+                System.out.println(notificationInformationHashMap);
 
                 obj_in1.close();
                 f_in1.close();
@@ -96,7 +113,7 @@ public class Notifications {
                 f_out = new FileOutputStream(f);
                 ObjectOutputStream obj_out;
                 obj_out = new ObjectOutputStream(f_out);
-                obj_out.writeObject(notificationIdHashMap);
+                obj_out.writeObject(notificationInformationHashMap);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(WhoShotMyPOSGUI.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
