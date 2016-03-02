@@ -42,23 +42,22 @@ public class WhoShotMyPOSMainClass {
     //https://hooks.slack.com/services/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
     
     public void initialLoop(String URLToSearch) {
-        collectNotificationIDs(URLToSearch);        
+        collectNotificationIDs(URLToSearch);
     }
-    
-    private void getNotificationTexts(String URLToSearch){
+
+    private void getNotificationTexts(String URLToSearch) {
         List<String> notificationIDs = notificationInformation.getNotificationIDsAsArrayList();
-        for(String notificationID: notificationIDs){
-            readURL(NotificationIDToTextURLChange(URLToSearch, notificationID));            
+        for (String notificationID : notificationIDs) {
+            readURL(NotificationIDToTextURLChange(URLToSearch, notificationID));
             getNotificationTextInformation(notificationID);
         }
     }
-    
-    private String NotificationIDToTextURLChange(String URLToChange, String notificationID){
-        String changedURL = URLToChange.replace("Notification", "NotificationTexts");        
+
+    private String NotificationIDToTextURLChange(String URLToChange, String notificationID) {
+        String changedURL = URLToChange.replace("Notification", "NotificationTexts");
         changedURL += notificationID;
         return changedURL;
     }
-            
 
     private void readURL(String URLToUse) {
         URL searchForNotifications = createURL(URLToUse);
@@ -99,35 +98,46 @@ public class WhoShotMyPOSMainClass {
 
     private void collectNotificationIDs(String URLToSearch) {
         readURL(URLToSearch);
-        HashMap hash = new HashMap();
+        List<String> notificationInformationList = new ArrayList();
         for (String webpageTemp : WebpageInformationStorage) {
             if (webpageTemp.contains("typeID=\"75\"")) {
                 String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
                 if (!notificationInformation.containsNotificationID(notificationID)) {
-                    hash.put("Time: ", getTimeDate(webpageTemp));
-                    notificationInformation.addNotificationID(notificationID, hash);
+                    notificationInformationList.add("Time: " + getTimeDate(webpageTemp));
+                    notificationInformation.addNotificationID(notificationID, notificationInformationList);
                 }
             }
         }
         getNotificationTexts(URLToSearch);
     }
-    
-    private void getNotificationTextInformation(String notificationID){        
-        for(String webpageTemp : WebpageInformationStorage){
-            if(webpageTemp.contains("aggressorID")){
+
+    private void getNotificationTextInformation(String notificationID) {
+        for (String webpageTemp : WebpageInformationStorage) {
+            if (webpageTemp.contains("aggressorID")) {
                 getCharacterInformation((extractAggressorID(webpageTemp)), notificationID);
             }
-            if(webpageTemp.contains("solarSystemID")){
+            if (webpageTemp.contains("solarSystemID")) {
                 getSolarSystemName(webpageTemp, notificationID);
             }
-            if(webpageTemp.contains("shieldValue")){
+            if (webpageTemp.contains("shieldValue")) {
                 getShieldValue(webpageTemp, notificationID);
             }
         }
     }
-    
-    private void getCharacterInformation(String aggressorID, String notificationID){
-        
+
+    private void getCharacterInformation(String aggressorID, String notificationID) {
+        readURL(createAggressorIDURLContents(aggressorID));
+        for (String webpageTemp : WebpageInformationStorage) {
+            if (webpageTemp.contains("characterName")) {
+                getCharacterName((extractAggressorID(webpageTemp)), notificationID);
+            }
+            if (webpageTemp.contains("<corporation>")) {
+                getCharacterCorporation(webpageTemp, notificationID);
+            }
+            if (webpageTemp.contains("<alliance>")) {
+                getCharacterAlliance(webpageTemp, notificationID);
+            }
+        }
     }
 
     private String getTimeDate(String timeDateContainingLine) {
@@ -147,16 +157,17 @@ public class WhoShotMyPOSMainClass {
         String solarSystem = solarSystemIDContainingString.substring(solarSystemIDContainingString.lastIndexOf(":") + 2);
         int id = Integer.parseInt(solarSystem);
         String solarSystemName = systemNames.getSystemName(id);
-        notificationInformation.editNotificationInformation(notificationID, "Solar System: ", solarSystemName);
+        notificationInformation.editNotificationInformation(notificationID, "Solar System: " + solarSystemName);
     }
 
     private void getShieldValue(String shieldValueContainingString, String notificationID) {
         String shieldValue = shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
-        notificationInformation.editNotificationInformation(notificationID, "Shield Value: ", shieldValue);
+        notificationInformation.editNotificationInformation(notificationID, "Shield Value: " + shieldValue);
     }
 
-    private String getCharacterName(String characterNameContainedLine, String notificationID) {
-        return characterNameContainedLine.substring(characterNameContainedLine.indexOf(">") + 1, characterNameContainedLine.indexOf("</"));
+    private void getCharacterName(String characterNameContainedLine, String notificationID) {
+        String characterName = characterNameContainedLine.substring(characterNameContainedLine.indexOf(">") + 1, characterNameContainedLine.indexOf("</"));
+        notificationInformation.editNotificationInformation(notificationID, "Character Name: " + characterName);
     }
 
     private String getCharacterCorporation(String characterCorporationContainedLine, String notificationID) {

@@ -25,13 +25,13 @@ import java.util.logging.Logger;
  */
 public class NotificationInformation {
 
-    private HashMap<String, HashMap<String, String>> notificationInformationHashMap = new HashMap();
+    private HashMap<String, List<String>> notificationInformationHashMap = new HashMap();
 
     public NotificationInformation() {
         loadNotificationIDs();
     }
 
-    public void addNotificationID(String notificationID, HashMap notificationInformation) {
+    public void addNotificationID(String notificationID, List notificationInformation) {
         notificationInformationHashMap.put(notificationID, notificationInformation);
     }
 
@@ -47,14 +47,19 @@ public class NotificationInformation {
         return notificationInformationHashMap.containsKey(IDToCheck);
     }
     
-    public void editNotificationInformation(String notificationId, String notificationInformationKey, String notificationInformationValue){
-        HashMap notificationInformation = getNotificationIDInformation(notificationId);
-        notificationInformation.put(notificationInformationKey, notificationInformationValue);
-        notificationInformationHashMap.put(notificationId, notificationInformation);
+    public void editNotificationInformation(String notificationId, String notificationInformation){
+        List<String> notificationInformationList = getNotificationIDInformation(notificationId);
+        notificationInformationList.add(notificationInformation);
+        notificationInformationHashMap.put(notificationId, notificationInformationList);
     }
 
-    public HashMap getNotificationIDInformation(String notificationID) {
+    public List getNotificationIDInformation(String notificationID) {
         return notificationInformationHashMap.get(notificationID);
+    }
+    
+    public String getNotificationIDInformationAsString(String notificiationID){
+        //List<String> notificationInformation = getNotificationIDInformation(notificiationID);
+        return null;
     }
 
     public List<String> getNotificationIDsAsArrayList() {
