@@ -47,9 +47,9 @@ public class NotificationInformation {
         return notificationInformationHashMap.containsKey(IDToCheck);
     }
     
-    public void editNotificationInformation(String notificationId, String notificationInformation){
+    public void editNotificationInformation(String notificationId, String notificationInformation, int listPositionNumber){
         List<String> notificationInformationList = getNotificationIDInformation(notificationId);
-        notificationInformationList.add(notificationInformation);
+        notificationInformationList.add(listPositionNumber, notificationInformation);
         notificationInformationHashMap.put(notificationId, notificationInformationList);
     }
 
@@ -58,15 +58,22 @@ public class NotificationInformation {
     }
     
     public String getNotificationIDInformationAsString(String notificiationID){
-        //List<String> notificationInformation = getNotificationIDInformation(notificiationID);
-        return null;
+        List<String> notificationInformation = getNotificationIDInformation(notificiationID);
+        StringBuilder builder = new StringBuilder();
+        for(String notificationInfo:notificationInformation){            
+            builder.append(notificationInfo);      
+            builder.append("\n");
+        }
+        builder.append("--------");
+        builder.append("\n");
+        return builder.toString();
     }
 
     public List<String> getNotificationIDsAsArrayList() {
         List<String> notificationIdArray = new ArrayList();
         if (!notificationInformationHashMap.isEmpty()) {
             for (String notificationID : notificationInformationHashMap.keySet()) {
-                notificationIdArray.add(notificationID);
+                notificationIdArray.add(notificationID);                
             }
         }
         return notificationIdArray;

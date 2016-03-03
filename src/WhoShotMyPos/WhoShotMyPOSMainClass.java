@@ -98,13 +98,11 @@ public class WhoShotMyPOSMainClass {
 
     private void collectNotificationIDs(String URLToSearch) {
         readURL(URLToSearch);
-        List<String> notificationInformationList = new ArrayList();
         for (String webpageTemp : WebpageInformationStorage) {
             if (webpageTemp.contains("typeID=\"75\"")) {
                 String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
                 if (!notificationInformation.containsNotificationID(notificationID)) {
-                    notificationInformationList.add("Time: " + getTimeDate(webpageTemp));
-                    notificationInformation.addNotificationID(notificationID, notificationInformationList);
+                    getTimeDate(notificationID, webpageTemp);
                 }
             }
         }
@@ -140,9 +138,9 @@ public class WhoShotMyPOSMainClass {
         }
     }
 
-    private String getTimeDate(String timeDateContainingLine) {
+    private void getTimeDate(String notificationID, String timeDateContainingLine) {
         String timeDate = timeDateContainingLine.substring(timeDateContainingLine.indexOf("sentDate=") + 10, timeDateContainingLine.indexOf("sentDate=") + 29);
-        return timeDate;
+        notificationInformation.editNotificationInformation(notificationID, "Time: " + timeDate, 0);
     }
 
     private String extractAggressorID(String aggressorIDContainedLine) {
@@ -157,33 +155,31 @@ public class WhoShotMyPOSMainClass {
         String solarSystem = solarSystemIDContainingString.substring(solarSystemIDContainingString.lastIndexOf(":") + 2);
         int id = Integer.parseInt(solarSystem);
         String solarSystemName = systemNames.getSystemName(id);
-        notificationInformation.editNotificationInformation(notificationID, "Solar System: " + solarSystemName);
+        notificationInformation.editNotificationInformation(notificationID, "Solar System: " + solarSystemName, 5);
     }
 
     private void getShieldValue(String shieldValueContainingString, String notificationID) {
         String shieldValue = shieldValueContainingString.substring(shieldValueContainingString.lastIndexOf(":") + 4, shieldValueContainingString.lastIndexOf(":") + 6) + "%";
-        notificationInformation.editNotificationInformation(notificationID, "Shield Value: " + shieldValue);
+        notificationInformation.editNotificationInformation(notificationID, "Shield Value: " + shieldValue, 4);
     }
 
     private void getCharacterName(String characterNameContainedLine, String notificationID) {
         String characterName = characterNameContainedLine.substring(characterNameContainedLine.indexOf(">") + 1, characterNameContainedLine.indexOf("</"));
-        notificationInformation.editNotificationInformation(notificationID, "Character Name: " + characterName);
+        notificationInformation.editNotificationInformation(notificationID, "Character Name: " + characterName, 1);
     }
 
-    private String getCharacterCorporation(String characterCorporationContainedLine, String notificationID) {
-        return characterCorporationContainedLine.substring(characterCorporationContainedLine.indexOf(">") + 1, characterCorporationContainedLine.indexOf("</"));
+    private void getCharacterCorporation(String characterCorporationContainedLine, String notificationID) {
+        String characterCorporation = characterCorporationContainedLine.substring(characterCorporationContainedLine.indexOf(">") + 1, characterCorporationContainedLine.indexOf("</"));
+        notificationInformation.editNotificationInformation(notificationID, "Character Corporation: " + characterCorporation, 2);
     }
 
-    private String getCharacterAlliance(String characterAllianceContainedLine, String notificationID) {
-        return characterAllianceContainedLine.substring(characterAllianceContainedLine.indexOf(">") + 1, characterAllianceContainedLine.indexOf("</"));
+    private void getCharacterAlliance(String characterAllianceContainedLine, String notificationID) {
+        String characterAlliance = characterAllianceContainedLine.substring(characterAllianceContainedLine.indexOf(">") + 1, characterAllianceContainedLine.indexOf("</"));
+        notificationInformation.editNotificationInformation(notificationID, "Character Corporation: " + characterAlliance, 3);
     }
 
-    private void buildMessageString(String lineToAdd) {
-        message += lineToAdd + "\n";
-    }
-
-    public String getMessage() {
-        return message;
+    public void getMessage() {
+        //notificationInformation.getNotificationIDInformationAsString();
     }
 
 }
