@@ -5,7 +5,10 @@
  */
 package WhoShotMyPos;
 
+import java.util.Timer;
 import javax.swing.text.DefaultCaret;
+import net.gpedro.integrations.slack.SlackApi;
+import net.gpedro.integrations.slack.SlackMessage;
 
 /**
  *
@@ -13,12 +16,16 @@ import javax.swing.text.DefaultCaret;
  */
 public class WhoShotMyPOSGUI extends javax.swing.JFrame {   
 
+    Timer timer;
+    SlackApi slackToken;
+    WhoShotMyPOSMainClass whoShot;
+    
     /**
      * Creates new form WhuDuShutPosGUI
      */
     public WhoShotMyPOSGUI() {
         initComponents();
-        loadSystem();
+        //loadSystem();  
     }
 
     
@@ -132,20 +139,30 @@ public class WhoShotMyPOSGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void goButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_goButtonMouseClicked
-        
-//        timer = new Timer();
-//        timer.scheduleAtFixedRate(task, 0, 1000 * 60);
+        timer = new Timer();
+        timer.scheduleAtFixedRate(whoShot = new WhoShotMyPOSMainClass(apiField.getText()), 0, 1000 * 60);
+        sendMessage();        
     }//GEN-LAST:event_goButtonMouseClicked
 
+    private void sendMessage(){
+        slackToken = new SlackApi(slackTokenField.getText());
+        if(whoShot.getMessage() != null){
+        outputPlace.append(whoShot.getMessage());
+        slackToken.call(new SlackMessage("#posbotspam", whoShot.getMessage()));
+        }
+    }
+    
     private void StopButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StopButtonMouseClicked
-        
+        if(timer != null){
+            timer.cancel();
+            this.dispose();
+        }
     }//GEN-LAST:event_StopButtonMouseClicked
 
     private void saveDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveDefaultsMouseClicked
         
     }//GEN-LAST:event_saveDefaultsMouseClicked
-
-    
+  
     private void loadSystem() {
         DefaultCaret caret = (DefaultCaret) outputPlace.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);

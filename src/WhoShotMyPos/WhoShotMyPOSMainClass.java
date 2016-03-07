@@ -10,27 +10,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.gpedro.integrations.slack.SlackMessage;
 
 /**
  *
  * @author Alex
  */
-public class WhoShotMyPOSMainClass {
+public class WhoShotMyPOSMainClass extends TimerTask {
 
     private final NotificationInformation notificationInformation = new NotificationInformation();
     private final solarSystemData systemNames = new solarSystemData();
     private ArrayList<String> WebpageInformationStorage = new ArrayList();
-    private String message;
-
+    private String URL;
+    
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
     //keyID, vCode, characterID.
     //https://api.eveonline.com/char/NotificationTexts.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198&IDs=530705490 notifications text request.
@@ -41,8 +37,17 @@ public class WhoShotMyPOSMainClass {
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
     //https://hooks.slack.com/services/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
     
-    public void initialLoop(String URLToSearch) {
-        collectNotificationIDs(URLToSearch);
+    WhoShotMyPOSMainClass(String URLToSearch){
+        this.URL = URLToSearch;
+    }
+    
+    @Override
+    public void run() {
+        findNotifications();
+    }
+    
+    public void findNotifications() {
+        collectNotificationIDs(URL);
     }
 
     private void getNotificationTexts(String URLToSearch) {
@@ -181,5 +186,7 @@ public class WhoShotMyPOSMainClass {
     public String getMessage() {
         return notificationInformation.getMessageText();        
     }
+
+    
 
 }
