@@ -6,6 +6,7 @@
 package WhoShotMyPos;
 
 import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.text.DefaultCaret;
 import net.gpedro.integrations.slack.SlackApi;
 import net.gpedro.integrations.slack.SlackMessage;
@@ -26,6 +27,7 @@ public class WhoShotMyPOSGUI extends javax.swing.JFrame {
     public WhoShotMyPOSGUI() {
         initComponents();
         loadSystem();  
+        whoShot = new WhoShotMyPOSMainClass();
     }
 
     
@@ -140,10 +142,17 @@ public class WhoShotMyPOSGUI extends javax.swing.JFrame {
 
     private void goButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_goButtonMouseClicked
         timer = new Timer();
-        timer.scheduleAtFixedRate(whoShot = new WhoShotMyPOSMainClass(apiField.getText()), 0, 1000 * 60);
-        sendMessage();        
+        timer.scheduleAtFixedRate(task,0, 1000 * 60);                
     }//GEN-LAST:event_goButtonMouseClicked
 
+    TimerTask task = new TimerTask(){    
+    @Override
+    public void run() {
+        whoShot.findNotifications(apiField.getText());
+        outputPlace.append("Running ------\n");
+        sendMessage();
+    }};
+    
     private void sendMessage(){
         slackToken = new SlackApi(slackTokenField.getText());
         if(whoShot.getMessage() != null && !"".equals(whoShot.getMessage())){

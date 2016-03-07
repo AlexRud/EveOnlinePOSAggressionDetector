@@ -12,7 +12,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +19,7 @@ import java.util.logging.Logger;
  *
  * @author Alex
  */
-public class WhoShotMyPOSMainClass extends TimerTask {
+public class WhoShotMyPOSMainClass {
 
     private final NotificationInformation notificationInformation = new NotificationInformation();
     private final solarSystemData systemNames = new solarSystemData();
@@ -37,16 +36,11 @@ public class WhoShotMyPOSMainClass extends TimerTask {
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
     //https://hooks.slack.com/services/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
     
-    WhoShotMyPOSMainClass(String URLToSearch){
-        this.URL = URLToSearch;
-    }
+//    WhoShotMyPOSMainClass(String URLToSearch){
+//        this.URL = URLToSearch;
+//    }
     
-    @Override
-    public void run() {
-        findNotifications();
-    }
-    
-    public void findNotifications() {
+    public void findNotifications(String URL) {
         collectNotificationIDs(URL);
     }
 
@@ -185,8 +179,5 @@ public class WhoShotMyPOSMainClass extends TimerTask {
 
     public String getMessage() {
         return notificationInformation.getMessageText();        
-    }
-
-    
-
+    }    
 }
