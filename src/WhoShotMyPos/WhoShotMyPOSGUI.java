@@ -25,7 +25,7 @@ public class WhoShotMyPOSGUI extends javax.swing.JFrame {
      */
     public WhoShotMyPOSGUI() {
         initComponents();
-        //loadSystem();  
+        loadSystem();  
     }
 
     
@@ -146,7 +146,7 @@ public class WhoShotMyPOSGUI extends javax.swing.JFrame {
 
     private void sendMessage(){
         slackToken = new SlackApi(slackTokenField.getText());
-        if(whoShot.getMessage() != null){
+        if(whoShot.getMessage() != null && !"".equals(whoShot.getMessage())){
         outputPlace.append(whoShot.getMessage());
         slackToken.call(new SlackMessage("#posbotspam", whoShot.getMessage()));
         }

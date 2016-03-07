@@ -16,10 +16,6 @@ import java.util.Scanner;
 public class solarSystemData {
     private final HashMap<Integer, String> solarSystems = new HashMap();
     
-    public static void main(String args[]){
-        solarSystemData ssd = new solarSystemData();
-    }
-    
     public solarSystemData(){
         loadSolarSystemData();
     }
@@ -32,7 +28,6 @@ public class solarSystemData {
                 String systemName = solarSystemInformation[1];
                 int systemID = Integer.parseInt(solarSystemInformation[0]);
                 solarSystems.put(systemID, systemName);
-                System.out.println(systemName + " " + systemID + "\n");
             }
             
         }       
