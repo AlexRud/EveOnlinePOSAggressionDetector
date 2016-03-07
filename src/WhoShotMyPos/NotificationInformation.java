@@ -78,6 +78,16 @@ public class NotificationInformation {
         }
         return notificationIdArray;
     }
+    
+    public String getMessageText(){
+        List<String> notificationIDs = getNotificationIDsAsArrayList();        
+        StringBuilder builder = new StringBuilder();
+        for(String notificationID : notificationIDs){
+            String notificationInfo = getNotificationIDInformationAsString(notificationID);            
+            builder.append(notificationInfo);
+        }
+        return builder.toString();
+    }
 
 //    private void loadDefaults() {
 //        if (notificationInformationHashMap.size() > 0) {
@@ -87,6 +97,7 @@ public class NotificationInformation {
 //            slackTokenField.setText(notificationInformationHashMap.get(1).toString());
 //        }
 //    }
+    
     public void saveNotificationIDs() {
         try {
             File f = new File("notificationIDs.data");

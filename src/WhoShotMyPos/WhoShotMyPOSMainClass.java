@@ -178,8 +178,8 @@ public class WhoShotMyPOSMainClass {
         notificationInformation.editNotificationInformation(notificationID, "Character Corporation: " + characterAlliance, 3);
     }
 
-    public void getMessage() {
-        //notificationInformation.getNotificationIDInformationAsString();
+    public String getMessage() {
+        return notificationInformation.getMessageText();        
     }
 
 }
