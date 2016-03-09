@@ -23,8 +23,7 @@ public class WhoShotMyPOSMainClass {
 
     private final NotificationInformation notificationInformation = new NotificationInformation();
     private final solarSystemData systemNames = new solarSystemData();
-    private ArrayList<String> WebpageInformationStorage = new ArrayList();
-    private String URL;
+    private ArrayList<String> WebpageInformationStorage;
     
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
     //keyID, vCode, characterID.
@@ -35,10 +34,8 @@ public class WhoShotMyPOSMainClass {
     //Luke API
     //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
     //https://hooks.slack.com/services/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
-    
-//    WhoShotMyPOSMainClass(String URLToSearch){
-//        this.URL = URLToSearch;
-//    }
+    //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=3348431&vCode=M1WNu4YnCSLnRw08EPC2kX2TKNb1kfOEgLO0WHhHMNT6oUAlfNi77PfnrepPKgcT&characterID=94626740
+
     
     public void findNotifications(String URL) {
         collectNotificationIDs(URL);
@@ -53,8 +50,8 @@ public class WhoShotMyPOSMainClass {
     }
 
     private String NotificationIDToTextURLChange(String URLToChange, String notificationID) {
-        String changedURL = URLToChange.replace("Notification", "NotificationTexts");
-        changedURL += notificationID;
+        String changedURL = URLToChange.replace("Notifications", "NotificationTexts");
+        changedURL += "&IDs=" +notificationID;
         return changedURL;
     }
 
@@ -85,6 +82,7 @@ public class WhoShotMyPOSMainClass {
     }
 
     private void readInputStreamToArray(BufferedReader BufferToRead) {
+        WebpageInformationStorage = new ArrayList();
         try {
             String incomingLine;
             while ((incomingLine = BufferToRead.readLine()) != null) {
@@ -97,15 +95,29 @@ public class WhoShotMyPOSMainClass {
 
     private void collectNotificationIDs(String URLToSearch) {
         readURL(URLToSearch);
+        ArrayList<String> list = new ArrayList();
+        list = fillArrayList(list);
         for (String webpageTemp : WebpageInformationStorage) {
             if (webpageTemp.contains("typeID=\"75\"")) {
                 String notificationID = webpageTemp.substring(webpageTemp.indexOf("=") + 2, webpageTemp.indexOf("typeID") - 2);
                 if (!notificationInformation.containsNotificationID(notificationID)) {
+                    notificationInformation.addNotificationID(notificationID, list);
                     getTimeDate(notificationID, webpageTemp);
+                    getNotificationTexts(URLToSearch);
                 }
             }
         }
-        getNotificationTexts(URLToSearch);
+        
+    }
+    
+    private ArrayList fillArrayList(ArrayList listToBeFilled){
+        listToBeFilled.add("Time: None");
+        listToBeFilled.add("Character Name: None");
+        listToBeFilled.add("Character Corporation: None");
+        listToBeFilled.add("Character Alliance: None");
+        listToBeFilled.add("Shield Value: None");
+        listToBeFilled.add("Solar System: None");
+        return listToBeFilled;
     }
 
     private void getNotificationTextInformation(String notificationID) {
@@ -130,7 +142,7 @@ public class WhoShotMyPOSMainClass {
             }
             if (webpageTemp.contains("<corporation>")) {
                 getCharacterCorporation(webpageTemp, notificationID);
-            }
+            }            
             if (webpageTemp.contains("<alliance>")) {
                 getCharacterAlliance(webpageTemp, notificationID);
             }

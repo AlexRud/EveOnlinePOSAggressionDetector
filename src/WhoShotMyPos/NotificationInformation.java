@@ -15,7 +15,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,15 +24,17 @@ import java.util.logging.Logger;
  */
 public class NotificationInformation {
 
-    private HashMap<String, List<String>> notificationInformationHashMap = new HashMap();
+    private HashMap<String, ArrayList<String>> notificationInformationHashMap = new HashMap();
+    private List<String> IDs = new ArrayList();
 
     public NotificationInformation() {
         loadNotificationIDs();
     }
 
-    public void addNotificationID(String notificationID, List notificationInformation) {
+    public void addNotificationID(String notificationID, ArrayList notificationInformation) {   
         notificationInformationHashMap.put(notificationID, notificationInformation);
     }
+
 
     public void removeNotificationID(String notificationID) {
         notificationInformationHashMap.remove(notificationID);
@@ -48,17 +49,17 @@ public class NotificationInformation {
     }
     
     public void editNotificationInformation(String notificationId, String notificationInformation, int listPositionNumber){
-        List<String> notificationInformationList = getNotificationIDInformation(notificationId);
-        notificationInformationList.add(listPositionNumber, notificationInformation);
+        ArrayList<String> notificationInformationList = getNotificationIDInformation(notificationId);
+        notificationInformationList.set(listPositionNumber, notificationInformation);
         notificationInformationHashMap.put(notificationId, notificationInformationList);
     }
 
-    public List getNotificationIDInformation(String notificationID) {
+    public ArrayList getNotificationIDInformation(String notificationID) {
         return notificationInformationHashMap.get(notificationID);
     }
     
     public String getNotificationIDInformationAsString(String notificiationID){
-        List<String> notificationInformation = getNotificationIDInformation(notificiationID);
+        ArrayList<String> notificationInformation = getNotificationIDInformation(notificiationID);
         StringBuilder builder = new StringBuilder();
         for(String notificationInfo:notificationInformation){            
             builder.append(notificationInfo);      
@@ -81,14 +82,18 @@ public class NotificationInformation {
     
     public String getMessageText(){
         List<String> notificationIDs = getNotificationIDsAsArrayList();        
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();        
         for(String notificationID : notificationIDs){
+            if(!IDs.contains(notificationID)){
             String notificationInfo = getNotificationIDInformationAsString(notificationID);            
             builder.append(notificationInfo);
+            IDs.add(notificationID);
+            }
         }
-        return builder.toString();
+        saveNotificationIDs();
+        return builder.toString();        
     }
-
+    
 //    private void loadDefaults() {
 //        if (notificationInformationHashMap.size() > 0) {
 //            apiField.setText(notificationInformationHashMap.get(0).toString());
@@ -111,17 +116,15 @@ public class NotificationInformation {
     }
 
     private void loadNotificationIDs() {
-        FileInputStream f_in1 = null;
+        FileInputStream f_in1;
         File f1 = new File("notificationIDs.data");
 
         if (f1.exists()) {
             try {
                 f_in1 = new FileInputStream(f1);
-                ObjectInputStream obj_in1 = new ObjectInputStream(f_in1);
-                notificationInformationHashMap = (HashMap) obj_in1.readObject();
-                System.out.println(notificationInformationHashMap);
-
-                obj_in1.close();
+                try (ObjectInputStream obj_in1 = new ObjectInputStream(f_in1)) {
+                    notificationInformationHashMap = (HashMap) obj_in1.readObject();
+                }
                 f_in1.close();
 
             } catch (FileNotFoundException ex) {

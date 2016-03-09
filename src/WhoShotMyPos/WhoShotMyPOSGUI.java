@@ -15,22 +15,21 @@ import net.gpedro.integrations.slack.SlackMessage;
  *
  * @author Alex
  */
-public class WhoShotMyPOSGUI extends javax.swing.JFrame {   
+public class WhoShotMyPOSGUI extends javax.swing.JFrame {
 
     Timer timer;
     SlackApi slackToken;
     WhoShotMyPOSMainClass whoShot;
-    
+
     /**
      * Creates new form WhuDuShutPosGUI
      */
     public WhoShotMyPOSGUI() {
         initComponents();
-        loadSystem();  
+        loadSystem();
         whoShot = new WhoShotMyPOSMainClass();
     }
 
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -142,36 +141,39 @@ public class WhoShotMyPOSGUI extends javax.swing.JFrame {
 
     private void goButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_goButtonMouseClicked
         timer = new Timer();
-        timer.scheduleAtFixedRate(task,0, 1000 * 60);                
+        timer.scheduleAtFixedRate(task, 0, 1000 * 60);
     }//GEN-LAST:event_goButtonMouseClicked
 
-    TimerTask task = new TimerTask(){    
-    @Override
-    public void run() {
-        whoShot.findNotifications(apiField.getText());
-        outputPlace.append("Running ------\n");
-        sendMessage();
-    }};
-    
-    private void sendMessage(){
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            whoShot.findNotifications(apiField.getText());
+            outputPlace.append("Running ------\n");
+            sendMessage();
+        }
+    };
+
+    private void sendMessage() {
         slackToken = new SlackApi(slackTokenField.getText());
-        if(whoShot.getMessage() != null && !"".equals(whoShot.getMessage())){
-        outputPlace.append(whoShot.getMessage());
-        slackToken.call(new SlackMessage("#posbotspam", whoShot.getMessage()));
+        String messageHolder = whoShot.getMessage();
+
+        if (messageHolder != null && !"".equals(messageHolder)) {
+            outputPlace.append(messageHolder);
+            slackToken.call(new SlackMessage("#posbotspam", messageHolder));
         }
     }
-    
+
     private void StopButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StopButtonMouseClicked
-        if(timer != null){
+        if (timer != null) {
             timer.cancel();
             this.dispose();
         }
     }//GEN-LAST:event_StopButtonMouseClicked
 
     private void saveDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveDefaultsMouseClicked
-        
+
     }//GEN-LAST:event_saveDefaultsMouseClicked
-  
+
     private void loadSystem() {
         DefaultCaret caret = (DefaultCaret) outputPlace.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
