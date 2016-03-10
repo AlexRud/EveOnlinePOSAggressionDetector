@@ -17,9 +17,9 @@ import net.gpedro.integrations.slack.SlackMessage;
  */
 public class WhoShotMyPOSGUI extends javax.swing.JFrame {
 
-    Timer timer;
-    SlackApi slackToken;
-    WhoShotMyPOSMainClass whoShot;
+    private Timer timer;
+    private SlackApi slackToken;
+    private WhoShotMyPOSMainClass whoShot;
 
     /**
      * Creates new form WhuDuShutPosGUI
