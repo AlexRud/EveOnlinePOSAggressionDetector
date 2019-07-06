@@ -25,18 +25,7 @@ public class WhoShotMyPOSMainClass {
     private final solarSystemData systemNames = new solarSystemData();
     private ArrayList<String> WebpageInformationStorage;
     
-    //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198 notifications request.
-    //keyID, vCode, characterID.
-    //https://api.eveonline.com/char/NotificationTexts.xml.aspx?keyID=4474332&vCode=5MuDcndf6vTeYbBqhAZc7PdWGEH8XI6HfoenntMRoe50LY8mxEdWAj2uSt4mqzUR&characterID=95477198&IDs=530705490 notifications text request.
-    //keyID, vCode, characterID, notification id(s) from previous request.
-    //https://api.eveonline.com/eve/CharacterInfo.xml.aspx?characterid=94818624 character info request.
-    //Character name, corp name, alliance name, shield hp, time, system?
-    //Luke API
-    //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=455684&vCode=oAPDhYH9pc063j5GWszkvwvpPwC3fPD6FX515Q1JAl79RXoBhy9GInhMNth2Dutu&characterID=151627406
-    //https://hooks.slack.com/services/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
-    //https://api.eveonline.com/char/Notifications.xml.aspx?keyID=3348431&vCode=M1WNu4YnCSLnRw08EPC2kX2TKNb1kfOEgLO0WHhHMNT6oUAlfNi77PfnrepPKgcT&characterID=94626740
-
-    
+       
     public void findNotifications(String URL) {
         collectNotificationIDs(URL);
     }
